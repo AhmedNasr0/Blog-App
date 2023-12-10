@@ -60,7 +60,7 @@ const UserSchema=new mongoose.Schema({
     }
 },{timestamps:true})
 
-//validation 
+//validation Register User
 export const validateRegisterUser=(obj:Object)=>{
     const schema=joi.object({
         username:joi.string().trim().min(5).max(100).required(),
@@ -70,6 +70,17 @@ export const validateRegisterUser=(obj:Object)=>{
     })
     return schema.validate(obj);
 }
+// validate Login User
+export const validateLoginUser=(obj:Object)=>{
+    const schema=joi.object({
+        email:joi.string().trim().min(5).max(100).required(),
+        password:joi.string().trim().min(8).required(),
+    })
+    return schema.validate(obj);
+}
+
+
+
 // hash password and remove confirmed_password cuz we dont need it anymore
 UserSchema.pre<IUser>("save" ,async function(next){
     if(!this.isModified('password')) return next()

@@ -1,6 +1,7 @@
 import { Request , Response } from "express"
-import {User,validateRegisterUser} from "../Model/UserModel"
-
+import {User,validateLoginUser,validateRegisterUser} from "../Model/UserModel"
+import { GenerateToken } from "../utils/GenerateToken"
+const bcrypt =require('bcrypt')
 export const signup=async(req:Request,res:Response)=>{
     // 1) validate
     const{error}=validateRegisterUser(req.body)
@@ -21,4 +22,25 @@ export const signup=async(req:Request,res:Response)=>{
         confirmedpassword:req.body.confirmedpassword
     }).save()
     res.json({message:"Email Created Successfully"}).status(200)
+}
+
+
+
+export const signin =async(req:Request,res:Response)=>{
+    // check if email exist 
+    const user=await User.findOne({email:req.body.email})
+    if(!user) return res.json({message:"Email not Exist"})
+    // check pass
+    const validLogin=await bcrypt.compare(req.body.password,user.password)
+    if(!validLogin) return res.status(400).json({message:"invalid password or email !"})
+    // generate token
+    const token=GenerateToken({id:user._id , isAdmin:user.isAdmin})
+    // send token and details
+    res.status(200).json({
+        _id:user._id,
+        token,
+        email:user.email 
+        ,username:user.username
+    })
+
 }
