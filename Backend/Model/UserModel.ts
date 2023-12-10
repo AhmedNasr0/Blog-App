@@ -1,5 +1,17 @@
-import { Module } from "module";
-import mongoose, { model } from "mongoose";
+
+import mongoose, { Schema, model,Document } from "mongoose";
+const joi =require('joi')
+const bcrypt=require('bcrypt')
+export interface IUser extends Document{
+    name:string,
+    email:string,
+    password:string,
+    confirmedpassword:undefined,
+    image:object,
+    bio:string,
+    isAccountVerified:boolean,
+    isAdmin:boolean
+}
 
 const UserSchema=new mongoose.Schema({
     username:{
@@ -25,7 +37,6 @@ const UserSchema=new mongoose.Schema({
     },
     confirmedpassword:{
         type:String,
-        required:true,
         minlength:8,
     }
     ,
@@ -49,6 +60,24 @@ const UserSchema=new mongoose.Schema({
     }
 },{timestamps:true})
 
-const User=mongoose.model("User",UserSchema);
+//validation 
+export const validateRegisterUser=(obj:Object)=>{
+    const schema=joi.object({
+        username:joi.string().trim().min(5).max(100).required(),
+        email:joi.string().trim().min(5).max(100).required(),
+        password:joi.string().trim().min(8).required(),
+        confirmedpassword:joi.string().trim().min(8).required(),
+    })
+    return schema.validate(obj);
+}
+// hash password and remove confirmed_password cuz we dont need it anymore
+UserSchema.pre<IUser>("save" ,async function(next){
+    if(!this.isModified('password')) return next()
+    this.password=await bcrypt.hash(this.password,12)
+    this.confirmedpassword =undefined
+    next()})
 
-export default User;
+export const User=mongoose.model("User",UserSchema);
+module.exports = {validateRegisterUser, User};
+
+
