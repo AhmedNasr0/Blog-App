@@ -1,5 +1,5 @@
 import { Request , Response } from "express"
-import {User,validateLoginUser,validateRegisterUser} from "../Model/UserModel"
+import {User,validateRegisterUser} from "../Model/UserModel"
 import { GenerateToken } from "../utils/GenerateToken"
 const bcrypt =require('bcrypt')
 export const signup=async(req:Request,res:Response)=>{
