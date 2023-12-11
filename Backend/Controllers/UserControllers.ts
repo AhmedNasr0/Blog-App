@@ -1,6 +1,11 @@
 import {Request,Response} from 'express'
 import {User,validateUpdateUser} from '../Model/UserModel'
 const bcrypt = require('bcrypt')
+
+interface RequestCustom extends Request{
+    file:Express.Multer.File
+}
+
 /*
     API => /api/v1/User/all-users
     Method => GET
@@ -60,4 +65,15 @@ export const UpdateUserProfile=async (req:Request,res:Response)=>{
     // refresh and update token here 
 
     res.status(200).json({updatedUser})
+}
+
+/*
+    API => /api/v1/User/profile/Update-photo
+    Method => POST
+    return => 1) success => Update Photo
+              2) faild => return error 
+*/
+export const UpdatePhoto=(req:RequestCustom,res:Response)=>{
+    if(!req.file) res.json({message:"File not provided !"})
+    res.status(200).json({message:"Photo Updated Successfully"})
 }
