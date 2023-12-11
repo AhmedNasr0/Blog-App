@@ -70,15 +70,16 @@ export const validateRegisterUser=(obj:Object)=>{
     })
     return schema.validate(obj);
 }
-// validate Login User
-export const validateLoginUser=(obj:Object)=>{
+// validate Update User
+export const validateUpdateUser=(obj:Object)=>{
     const schema=joi.object({
-        email:joi.string().trim().min(5).max(100).required(),
-        password:joi.string().trim().min(8).required(),
+        username:joi.string().trim().min(5).max(100),
+        bio:joi.string(),
+        email:joi.string().trim().min(5).max(100),
+        password:joi.string().trim().min(8),
     })
     return schema.validate(obj);
 }
-
 
 
 // hash password and remove confirmed_password cuz we dont need it anymore
@@ -89,6 +90,6 @@ UserSchema.pre<IUser>("save" ,async function(next){
     next()})
 
 export const User=mongoose.model("User",UserSchema);
-module.exports = {validateRegisterUser, User};
+module.exports = {validateRegisterUser,validateUpdateUser, User};
 
 

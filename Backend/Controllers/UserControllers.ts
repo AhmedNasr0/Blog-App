@@ -1,6 +1,6 @@
 import {Request,Response} from 'express'
-import {User} from '../Model/UserModel'
-
+import {User,validateUpdateUser} from '../Model/UserModel'
+const bcrypt = require('bcrypt')
 /*
     API => /api/v1/User/all-users
     Method => GET
@@ -13,7 +13,7 @@ export const GetAllUsers=async (req:Request,res:Response)=>{
     res.status(200).json(AllUsers)
 }
 /*
-    API => /api/v1/User/user/:id
+    API => /api/v1/User/profile/:id
     Method => GET
     return => 1) success => specific Users
               2) faild => return error 
@@ -23,9 +23,41 @@ export const GetSpecificUser=async(req:Request,res:Response)=>{
     if(!user) res.status(400).json({message:"Something went Wrong !"})
     res.status(200).json(user)
 }
-
+/*
+    API => /api/v1/User/CountUsers
+    Method => GET
+    return => 1) success => number of users
+              2) faild => return error 
+*/
 export const GetCountOfAllUsers=async(req:Request,res:Response)=>{
     const NumberOfUsers=await User.countDocuments();
     if(!NumberOfUsers) return res.status(200).json("Number of Users = 0 ")
     res.status(200).json({NumberofUsers :`${NumberOfUsers}`});
+}
+/*
+    API => /api/v1/User/profile/:id
+    Method => PUT
+    return => 1) success => return updated user
+              2) faild => return error 
+*/
+export const UpdateUserProfile=async (req:Request,res:Response)=>{
+    // validate
+    const {error} = validateUpdateUser(req.body);
+    if(error) return res.json({message:error.details[0].message})
+    //hash password
+    let hashPass=req.body.password
+    if(hashPass)
+        hashPass=await bcrypt.hash(req.body.password,12)
+    //update user
+    const currentuser=await User.findByIdAndUpdate({_id:req.params.id},{
+        $set:{
+            username:req.body.username,
+            password:hashPass,
+            bio:req.body.bio
+        }
+    })
+    const updatedUser=await User.findOne({_id:req.params.id})
+    // refresh and update token here 
+
+    res.status(200).json({updatedUser})
 }
