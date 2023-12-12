@@ -2,7 +2,7 @@ import { Request,Response,NextFunction } from "express";
 import jwt, { JwtPayload} from 'jsonwebtoken'
 export interface RequestCustom extends Request
 {
-    user: string|null|JwtPayload;
+    user: string|null|JwtPayload|any
 }
 
 export const VerifyToken=async(req:RequestCustom,res:Response,next:NextFunction)=>{

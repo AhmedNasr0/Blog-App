@@ -9,7 +9,7 @@ cloudinary.config({
 export const cloudinaryUploadImage=async(fileToUpload:string)=>{
     try{
         const result =await cloudinary.uploader.upload(fileToUpload,
-            { public_id: "olympic_flag" ,resource_type:'auto'})
+            { resource_type:'auto'})
             return result
     }
     catch(error){

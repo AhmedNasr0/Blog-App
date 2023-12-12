@@ -39,11 +39,11 @@ const PostSchema=new mongoose.Schema({
         ]   
 },{timestamps:true})
 
-const Post=mongoose.model("Post",PostSchema);
+export const Post=mongoose.model("Post",PostSchema);
 
 // Express validation
 
-export const validate_Create_Post=(obj:Object)=>{
+export const validate_Create_Post=(obj:any)=>{
     const schema=joi.object({
         title:joi.string().trim().required().min(2).max(200),
         descreption:joi.string().trim().required().min(2).max(200),
@@ -52,7 +52,7 @@ export const validate_Create_Post=(obj:Object)=>{
     return schema.validate(obj)
 }
 
-export const validate_Update_post=(obj:Object)=>{
+export const validate_Update_post=(obj:any)=>{
     const schema=joi.object({
         title:joi.string().trim().min(2).max(200),
         description:joi.string().trim().min(2).max(200),

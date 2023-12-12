@@ -4,11 +4,7 @@ import { JwtPayload } from 'jsonwebtoken'
 import { cloudinaryRemoveImage, cloudinaryUploadImage } from '../utils/cloudinary'
 const fs=require('fs')
 const bcrypt = require('bcrypt')
-
-interface RequestCustom extends Request{
-    file:Express.Multer.File
-    user:JwtPayload|string|null|Object
-}
+import {RequestCustom} from '../utils/CustomRequest'
 
 /*
     API => /api/v1/User/all-users
