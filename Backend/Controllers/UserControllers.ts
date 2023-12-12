@@ -1,9 +1,13 @@
 import {Request,Response} from 'express'
 import {User,validateUpdateUser} from '../Model/UserModel'
+import { JwtPayload } from 'jsonwebtoken'
+import { cloudinaryRemoveImage, cloudinaryUploadImage } from '../utils/cloudinary'
+const fs=require('fs')
 const bcrypt = require('bcrypt')
 
 interface RequestCustom extends Request{
     file:Express.Multer.File
+    user:JwtPayload|string|null|Object
 }
 
 /*
@@ -73,7 +77,50 @@ export const UpdateUserProfile=async (req:Request,res:Response)=>{
     return => 1) success => Update Photo
               2) faild => return error 
 */
-export const UpdatePhoto=(req:RequestCustom,res:Response)=>{
+
+interface Iuser{
+    isAdmin:boolean,
+    id:string,
+    iat:number
+}
+interface IUser{
+    username?: string;
+    email?: string;
+    password?: string;
+    image: Object;
+    isAccountVerified?: boolean;
+    isAdmin?: boolean;
+    confirmedpassword?: string | undefined,
+    bio?: string | undefined;
+}
+export const UpdatePhoto=async(req:RequestCustom,res:Response)=>{
+    // validation
     if(!req.file) res.json({message:"File not provided !"})
+    // path of inserted image ,=> that in images folder
+    const image=req.file.path
+    // uploud to cloudinary
+    const uploadedImage:any=await cloudinaryUploadImage(image)
+    // get user from db
+    const currentUser=req.user as Iuser
+    const user:IUser|any =await User.findById(currentUser.id)
+   //check if user has old image
+   if(user.image.publicId!==null){
+    await cloudinaryRemoveImage(user.image.publicId)
+   }
+
+   user.image.url=uploadedImage.secure_url;
+   user.image.publicId=uploadedImage.public_id;
+   // update image in db
+    const users=await User.findOneAndUpdate({username:user.username},
+        {
+            image:{
+                url:user.image.url,
+                publicId:user.image.publicId
+            }
+        }
+    )
+   //send response
     res.status(200).json({message:"Photo Updated Successfully"})
+    //remove image from server
+    fs.unlinkSync(req.file.path) 
 }
