@@ -77,7 +77,6 @@ export const UpdateUserProfile=async (req:Request,res:Response)=>{
     return => 1) success => Update Photo
               2) faild => return error 
 */
-
 interface Iuser{
     isAdmin:boolean,
     id:string,
@@ -123,4 +122,23 @@ export const UpdatePhoto=async(req:RequestCustom,res:Response)=>{
     res.status(200).json({message:"Photo Updated Successfully"})
     //remove image from server
     fs.unlinkSync(req.file.path) 
+}
+
+/*
+    API => /api/v1/User/profile/:id
+    Method => DELETE
+    return => 1) success => delete user
+              2) faild => return error 
+*/
+export const DeleteUser=async(req:Request,res:Response)=>{
+    const user=await User.findById(req.params.id)
+    if(!user) res.json({message:"user not found"})
+    // delete img from cloudinary
+    await cloudinaryRemoveImage(user?.image.publicId);
+
+    // delete user 
+    await User.findOneAndDelete(user?._id) 
+    // response
+    res.json({message:"Your Account Deleted Successfully"})
+    
 }

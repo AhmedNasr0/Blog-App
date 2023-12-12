@@ -24,8 +24,6 @@ export const signup=async(req:Request,res:Response)=>{
     res.json({message:"Email Created Successfully"}).status(200)
 }
 
-
-
 export const signin =async(req:Request,res:Response)=>{
     // check if email exist 
     const user=await User.findOne({email:req.body.email})
