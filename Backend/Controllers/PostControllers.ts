@@ -46,7 +46,7 @@ export const createPost=async(req:RequestCustom,res:Response)=>{
 
 
 /*
-    API => /api/v1/Posts/allposts
+    API => /api/v1/Post/allposts
     Method => GET
     return => 1) success => All posts ,Number of all post , number of current page  and number of posts in cureent page
               2) faild => return error 
@@ -75,3 +75,33 @@ export const getAllPosts=async (req:Request,res:Response)=>{
         Posts: posts,
     })
 }
+
+/*
+    API => /api/v1/Post/:id
+    Method => GET
+    return => 1) success => spicefic post
+              2) faild => return error 
+*/
+export const getSinglePost=async (req:Request,res:Response)=>{
+
+    const post=await Post.findById(req.params.id).populate('user',['-password'])
+    if(!post) res.json({message:"post not found"})
+    res.json({
+        Post: post,
+    })
+}
+
+/*
+    API => /api/v1/Post/count
+    Method => GET
+    return => 1) success => number of posts
+              2) faild => return error 
+*/
+export const PostCount=async (req:Request,res:Response)=>{
+
+    const NumberOfPosts=await Post.find().countDocuments()
+    res.json({
+        NumberOfPosts: NumberOfPosts,
+    })
+}
+
