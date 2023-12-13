@@ -43,3 +43,35 @@ export const createPost=async(req:RequestCustom,res:Response)=>{
     if(req.file)
         fs.unlinkSync(req.file.path)
 }
+
+
+/*
+    API => /api/v1/Posts/allposts
+    Method => GET
+    return => 1) success => All posts ,Number of all post , number of current page  and number of posts in cureent page
+              2) faild => return error 
+*/
+export const getAllPosts=async (req:Request,res:Response)=>{
+    // exclude sorting and pagination params
+    const excludeParams=['page','limit','sort']
+    const queryObj={...req.query} // copy of query string to work with
+    excludeParams.forEach(el=>delete queryObj[el])
+    const {page,category,limit,sort} =req.query 
+    let defaultSort:any=sort||'-createdAt';
+    let Post_Per_Page:any=limit||1
+    let posts={}
+    if(page){
+        posts=await Post.find(queryObj).skip((+page-1)*Post_Per_Page).limit(Post_Per_Page).sort(defaultSort).populate('user',['-password'])
+    }
+    else{
+        posts=await Post.find(queryObj).sort(defaultSort).populate('user',['-password'])
+    } 
+    const NumberOfAllPosts= await Post.countDocuments()
+        const NumberOfPosts=Object.keys(posts).length
+    res.json({
+        NumberOfAllPosts:NumberOfAllPosts,
+        NumberOfPosts:NumberOfPosts,
+        Page:page,
+        Posts: posts,
+    })
+}
