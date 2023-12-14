@@ -55,7 +55,7 @@ export const validate_Create_Post=(obj:any)=>{
 export const validate_Update_post=(obj:any)=>{
     const schema=joi.object({
         title:joi.string().trim().min(2).max(200),
-        description:joi.string().trim().min(2).max(200),
+        descreption:joi.string().trim().min(2).max(200),
         category:joi.string().trim()
     })
     return schema.validate(obj)

@@ -1,5 +1,5 @@
 import {Request,Response} from 'express'
-import { validate_Create_Post } from '../Model/PostModel'
+import { validate_Create_Post, validate_Update_post } from '../Model/PostModel'
 import { cloudinaryRemoveImage, cloudinaryUploadImage } from '../utils/cloudinary';
 import {Post} from '../Model/PostModel'
 import { JwtPayload } from 'jsonwebtoken';
@@ -9,7 +9,7 @@ interface RequestCustom extends Request{
     user:JwtPayload|string|null|Object|any
 }
 
-export const createPost=async(req:RequestCustom,res:Response)=>{
+export const createPost=async(req:Request,res:Response)=>{
     // validate
     const {error} = validate_Create_Post(req.body);
     if(error) res.json({message:error.details[0].message})
@@ -116,7 +116,7 @@ export const DeletePost=async (req:Request,res:Response)=>{
     if(!post) return res.json({message:"Post Not Found"})
     const userId=post.user._id
     //check if exist user is himself or if the exist is admin
-    if(userId!=req.user.id || req.user.isAdmin){
+    if(userId!=req.user?.id || req.user?.isAdmin){
         return res.json({message:"Only Admin or User himself can delete this Post"})
     }
     if(post.image.publicId != null){
@@ -125,4 +125,77 @@ export const DeletePost=async (req:Request,res:Response)=>{
     }
     await Post.findByIdAndDelete(req.params.id)
     res.status(200).json({message:"Post Deleted Successfully"})
+}
+/*
+    API => /api/v1/Post/:id
+    Method => PUT
+    return => 1) success => message:post Updates successfully
+              2) faild => return error 
+*/
+export async function updatePostDetails (req:Request,res:Response){
+    //validation
+    const {error} = validate_Update_post(req.body)    
+    if(error) return res.json({message:error.details[0].message})
+
+    const post:any= await Post.findById(req.params.id).populate('user')
+    if(!post) return res.json({message:"Post Not Found"})
+    const userId=post.user._id
+    //check if exist user is himself 
+    if(userId!=req.user?.id){
+        return res.json({message:"Only  User himself can Update this Post"})
+    }
+    // update
+    const updatedpost=await Post.findByIdAndUpdate({_id:req.params.id},{
+        $set:{
+            title:req.body.title,
+            descreption:req.body.descreption,
+            category:req.body.category
+        }
+    },{new:true})
+    res.status(200).json({
+        message:"Post Updated Successfully"
+        ,post:updatedpost
+})
+}
+
+/*
+    API => /api/v1/Post/update-image/:id
+    Method => PUT
+    return => 1) success => message:image Updates successfully
+              2) faild => return error 
+*/
+export async function updatePostImage (req:Request,res:Response){
+    //validation
+    if(!req.file) return res.json({message:"image not provided"})
+
+    const post:any= await Post.findById(req.params.id).populate('user')
+    if(!post) return res.json({message:"Post Not Found"})
+    const userId=post.user._id
+    //check if exist user is himself 
+    if(userId!=req.user?.id){
+        return res.json({message:"Only  User himself can Update this Post"})
+    }
+    // update   
+    // 1) remove image from cloudinary 
+    await cloudinaryRemoveImage(post.image.publicId)
+    // 2) upload new image in images
+    const image=req.file.path
+    // uploud to cloudinary
+    const uploadedImage:any=await cloudinaryUploadImage(image)
+    
+    // update image in db
+    await Post.findByIdAndUpdate({_id:req.params.id},{
+        $set:{
+            image:{
+                url:uploadedImage.secure_url,
+                publicId:uploadedImage.public_id
+            }
+        }
+    },{new:true})
+
+    res.status(200).json({
+        message:"Image Updated Successfully"
+    })
+    // remove image from server
+    fs.unlinkSync(req.file.path) 
 }
