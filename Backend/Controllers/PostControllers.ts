@@ -1,6 +1,6 @@
 import {Request,Response} from 'express'
 import { validate_Create_Post } from '../Model/PostModel'
-import { cloudinaryUploadImage } from '../utils/cloudinary';
+import { cloudinaryRemoveImage, cloudinaryUploadImage } from '../utils/cloudinary';
 import {Post} from '../Model/PostModel'
 import { JwtPayload } from 'jsonwebtoken';
 import fs from 'fs'
@@ -105,3 +105,24 @@ export const PostCount=async (req:Request,res:Response)=>{
     })
 }
 
+/*
+    API => /api/v1/Post/:id
+    Method => DELETE
+    return => 1) success => message:post deleted successfully
+              2) faild => return error 
+*/
+export const DeletePost=async (req:Request,res:Response)=>{
+    const post:any= await Post.findById(req.params.id).populate('user')
+    if(!post) return res.json({message:"Post Not Found"})
+    const userId=post.user._id
+    //check if exist user is himself or if the exist is admin
+    if(userId!=req.user.id || req.user.isAdmin){
+        return res.json({message:"Only Admin or User himself can delete this Post"})
+    }
+    if(post.image.publicId != null){
+        // remove from cloudinary
+        await cloudinaryRemoveImage(post.image.publicId)
+    }
+    await Post.findByIdAndDelete(req.params.id)
+    res.status(200).json({message:"Post Deleted Successfully"})
+}
