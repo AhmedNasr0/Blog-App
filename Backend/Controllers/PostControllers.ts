@@ -199,3 +199,35 @@ export async function updatePostImage (req:Request,res:Response){
     // remove image from server
     fs.unlinkSync(req.file.path) 
 }
+
+/*
+    API => /api/v1/Post/Like/:id
+    Method => PUT
+    return => 1) success => message:likeed
+              2) faild => return error 
+*/
+export async function LikePost (req:Request,res:Response){
+    let post:any= await Post.findById(req.params.id).populate('user')
+    if(!post) return res.json({message:"Post Not Found"})
+    const userId=post.user._id
+    
+    const isPostLiked= await post.Likes.find( (userr:string) => userr.toString() === req.user.id)
+    
+    if(isPostLiked){
+        post=await Post.findByIdAndUpdate({_id:req.params.id},{
+            $pull:{
+                Likes:req.user.id
+            }
+        })
+    }
+    else{
+        post=await Post.findByIdAndUpdate({_id:req.params.id},{
+            $push:{
+                Likes:req.user.id
+            }
+        })
+    }
+    res.status(200).json({
+        message:"Post Liked"
+    })
+}
