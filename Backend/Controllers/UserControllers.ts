@@ -13,7 +13,7 @@ import {RequestCustom} from '../utils/CustomRequest'
               2) faild => return error 
 */
 export const GetAllUsers=async (req:Request,res:Response)=>{
-    const AllUsers= await User.find().select("-password")
+    const AllUsers= await User.find().select("-password").populate('posts')
     if(!AllUsers) res.status(400).json({message:"Something went Wrong !"})
     res.status(200).json(AllUsers)
 }
@@ -24,7 +24,7 @@ export const GetAllUsers=async (req:Request,res:Response)=>{
               2) faild => return error 
 */
 export const GetSpecificUser=async(req:Request,res:Response)=>{
-    const user=await User.findOne({_id:req.params.id})
+    const user=await User.findOne({_id:req.params.id}).populate('posts')
     if(!user) res.status(400).json({message:"Something went Wrong !"})
     res.status(200).json(user)
 }
@@ -131,7 +131,7 @@ export const DeleteUser=async(req:Request,res:Response)=>{
     if(!user) res.json({message:"user not found"})
     // delete img from cloudinary
     await cloudinaryRemoveImage(user?.image.publicId);
-
+    // to do delete all posts belong to     user
     // delete user 
     await User.findOneAndDelete(user?._id) 
     // response

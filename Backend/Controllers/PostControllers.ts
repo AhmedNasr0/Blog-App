@@ -84,7 +84,7 @@ export const getAllPosts=async (req:Request,res:Response)=>{
 */
 export const getSinglePost=async (req:Request,res:Response)=>{
 
-    const post=await Post.findById(req.params.id).populate('user',['-password'])
+    const post=await Post.findById(req.params.id).populate('user',['-password']).populate('comments')
     if(!post) res.json({message:"post not found"})
     res.json({
         Post: post,

@@ -5,6 +5,7 @@ import AuthRoutes from './Routes/AuthRoutes'
 import UserRoutes from './Routes/UserRoutes';
 import PostRoutes from './Routes/PostRoutes';
 import bodyParser from 'body-parser';
+import CommentRoutes from './Routes/CommentRoutes';
 const app=express();
 dotenv.config()
 
@@ -21,6 +22,7 @@ app.use(bodyParser.urlencoded({
 app.use('/api/v1/Auth',AuthRoutes)
 app.use('/api/v1/User',UserRoutes)
 app.use('/api/v1/Post',PostRoutes)
+app.use('/api/v1/Comment',CommentRoutes)
 app.listen(process.env.PORT,()=>{
     console.log(`Server running on Port :${process.env.PORT}`)
 })

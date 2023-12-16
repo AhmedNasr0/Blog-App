@@ -37,10 +37,19 @@ const PostSchema=new mongoose.Schema({
         ref:"User"
         }
         ]   
-},{timestamps:true})
+},{timestamps:true , toJSON:{virtuals:true} , toObject:{virtuals:true}})
+
+
+
+// create virtual comment field to retreie with post
+PostSchema.virtual('comments',{
+    ref:'Comment',
+    foreignField:'post',
+    localField:'_id'
+})
+
 
 export const Post=mongoose.model("Post",PostSchema);
-
 // Express validation
 
 export const validate_Create_Post=(obj:any)=>{
