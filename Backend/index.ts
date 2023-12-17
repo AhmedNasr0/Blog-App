@@ -7,6 +7,7 @@ import PostRoutes from './Routes/PostRoutes';
 import CategoryRoutes from './Routes/CategoryRoutes';
 import bodyParser from 'body-parser';
 import CommentRoutes from './Routes/CommentRoutes';
+import { errorHandler } from './utils/errorHandler';
 const app=express();
 dotenv.config()
 
@@ -25,6 +26,8 @@ app.use('/api/v1/User',UserRoutes)
 app.use('/api/v1/Post',PostRoutes)
 app.use('/api/v1/Comment',CommentRoutes)
 app.use('/api/v1/Category',CategoryRoutes)
+
+app.use(errorHandler)
 app.listen(process.env.PORT,()=>{
     console.log(`Server running on Port :${process.env.PORT}`)
 })
