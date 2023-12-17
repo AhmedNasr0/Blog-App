@@ -136,7 +136,7 @@ export const DeleteUser=async(req:Request,res:Response)=>{
         // 1)get all posts
         const posts:any=await Post.find({user:req.params.id})
         // 2) get all public id from each post
-        const publicIds=posts?.map((post)=>posts.image.publicId)
+        const publicIds=posts?.map((post:any)=>posts.image.publicId)
         // 3) delete from cloundiary
         if(publicIds?.length<=0){}
         else{

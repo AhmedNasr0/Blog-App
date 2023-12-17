@@ -5,7 +5,6 @@ const fs = require('fs')
 import {Comment} from '../Model/CommentModel'
 import { User } from "../Model/UserModel";
 import { Cursor } from "mongoose";
-import { IComment } from "../Types/Comment";
 
 
 export const getAllComments=async(req:Request,res:Response)=>{
