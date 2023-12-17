@@ -1,11 +1,12 @@
 import {Request,Response} from 'express'
 import {User,validateUpdateUser} from '../Model/UserModel'
 import { JwtPayload } from 'jsonwebtoken'
-import { cloudinaryRemoveImage, cloudinaryUploadImage } from '../utils/cloudinary'
+import { cloudinaryRemoveImage, cloudinaryRemoveMultipleImage,cloudinaryUploadImage } from '../utils/cloudinary'
 const fs=require('fs')
 const bcrypt = require('bcrypt')
 import {RequestCustom} from '../utils/CustomRequest'
-
+import { Post } from '../Model/PostModel'
+import { Comment } from '../Model/CommentModel'
 /*
     API => /api/v1/User/all-users
     Method => GET
@@ -129,9 +130,22 @@ export const UpdatePhoto=async(req:RequestCustom,res:Response)=>{
 export const DeleteUser=async(req:Request,res:Response)=>{
     const user=await User.findById(req.params.id)
     if(!user) res.json({message:"user not found"})
-    // delete img from cloudinary
+    // delete profile img from cloudinary
     await cloudinaryRemoveImage(user?.image.publicId);
-    // to do delete all posts belong to     user
+    // delete all images belong from posts or comments to user 
+        // 1)get all posts
+        const posts:any=await Post.find({user:req.params.id})
+        // 2) get all public id from each post
+        const publicIds=posts?.map((post)=>posts.image.publicId)
+        // 3) delete from cloundiary
+        if(publicIds?.length<=0){}
+        else{
+            await cloudinaryRemoveMultipleImage(publicIds)
+        }
+    // to do delete all posts and comments belong to user
+    await Comment.deleteMany({user:req.params.id})
+    await Post.deleteMany({user:req.params.id})
+
     // delete user 
     await User.findOneAndDelete(user?._id) 
     // response

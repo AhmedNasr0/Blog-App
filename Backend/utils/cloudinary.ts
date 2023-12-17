@@ -26,3 +26,13 @@ export const cloudinaryRemoveImage=async(fileToUpload:string)=>{
         return error
     }
 }
+
+export const cloudinaryRemoveMultipleImage=async(publicIds:string[])=>{
+    try{
+        const result =await cloudinary.api.delete_resources(publicIds)
+        return result
+    }
+    catch(err){
+        return err
+    }
+}

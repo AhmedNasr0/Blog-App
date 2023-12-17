@@ -2,6 +2,7 @@ import {Request,Response} from 'express'
 import { validate_Create_Post, validate_Update_post } from '../Model/PostModel'
 import { cloudinaryRemoveImage, cloudinaryUploadImage } from '../utils/cloudinary';
 import {Post} from '../Model/PostModel'
+import {Comment} from '../Model/CommentModel'
 import { JwtPayload } from 'jsonwebtoken';
 import fs from 'fs'
 
@@ -123,6 +124,7 @@ export const DeletePost=async (req:Request,res:Response)=>{
         // remove from cloudinary
         await cloudinaryRemoveImage(post.image.publicId)
     }
+    const comments=await Comment.deleteMany({post:req.params.id})
     await Post.findByIdAndDelete(req.params.id)
     res.status(200).json({message:"Post Deleted Successfully"})
 }
